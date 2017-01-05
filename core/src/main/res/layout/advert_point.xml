@@ -1,0 +1,14 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+    <!-- 广告滚动圆点View -->
+    <View
+            android:id="@+id/ad_item_v"
+            android:layout_width="5dp"
+            android:layout_height="5dp"
+            android:background="@drawable/news_advert_dot_d"
+            android:layout_marginLeft="2.5dip"
+            android:layout_marginRight="2.5dip"
+    />
+
+</LinearLayout>
