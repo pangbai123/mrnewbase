@@ -19,7 +19,6 @@ public abstract class BaseXListFooter extends LinearLayout {
 
     private Context mContext;
 
-
     public BaseXListFooter(Context context) {
         super(context);
     }

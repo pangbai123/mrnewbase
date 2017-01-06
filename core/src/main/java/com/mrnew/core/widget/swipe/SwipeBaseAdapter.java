@@ -1,18 +1,16 @@
 package com.mrnew.core.widget.swipe;
 
 import android.content.Context;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.mrnew.core.BaseListAdapter;
+import android.widget.ArrayAdapter;
 
 import java.util.*;
 
-public abstract class SwipeBaseAdapter<T, Holder> extends BaseListAdapter<T, Holder> {
-
-    public static final String TAG = "SwipeBaseAdapter";
-
+public abstract class SwipeBaseAdapter<T, Holder> extends ArrayAdapter<T> {
     public final int INVALID_POSITION = -1;
+    private final LayoutInflater inflater;
     /**
      * 显示模式，默认单开
      */
@@ -31,10 +29,37 @@ public abstract class SwipeBaseAdapter<T, Holder> extends BaseListAdapter<T, Hol
     protected Set<SwipeItem> mShownLayouts = new HashSet<SwipeItem>();
 
     public SwipeBaseAdapter(Context context, List list) {
-        super(context, list);
+        super(context, 0, list);
+        this.inflater = LayoutInflater.from(context);
     }
 
+    /**
+     * 获取滑动隐藏区域view的id
+     *
+     * @param position
+     * @return
+     */
     public abstract int getSwipeLayoutResourceId(int position);
+
+    /**
+     * 创建view
+     *
+     * @param inflater
+     * @param holder
+     * @param parent
+     * @param viewType
+     * @return
+     */
+    public abstract View onCreateView(LayoutInflater inflater, Holder holder, ViewGroup parent, int viewType);
+
+    /**
+     * 将数据与界面进行绑定的操作
+     *
+     * @param holder
+     * @param data
+     * @param position
+     */
+    public abstract void onBindViewHolder(Holder holder, T data, int position);
 
     @Override
     public final View getView(int position, View convertView, ViewGroup parent) {
@@ -57,7 +82,7 @@ public abstract class SwipeBaseAdapter<T, Holder> extends BaseListAdapter<T, Hol
      * @param target
      * @param position
      */
-    public void initialize(View target, int position) {
+    private void initialize(View target, int position) {
 
         int resId = getSwipeLayoutResourceId(position);
 
@@ -84,7 +109,7 @@ public abstract class SwipeBaseAdapter<T, Holder> extends BaseListAdapter<T, Hol
      * @param target
      * @param position
      */
-    public void updateConvertView(View target, int position) {
+    private void updateConvertView(View target, int position) {
 
         int resId = getSwipeLayoutResourceId(position);
 
@@ -97,13 +122,9 @@ public abstract class SwipeBaseAdapter<T, Holder> extends BaseListAdapter<T, Hol
         valueBox.swipeMemory.setPosition(position);
         valueBox.onLayoutListener.setPosition(position);
         valueBox.position = position;
-
-        Log.d(TAG, "updateConvertView=" + position);
-
     }
 
     private void closeAllExcept(SwipeItem layout) {
-
         for (SwipeItem s : mShownLayouts) {
             if (s != layout)
                 s.close();
@@ -138,10 +159,20 @@ public abstract class SwipeBaseAdapter<T, Holder> extends BaseListAdapter<T, Hol
         }
     }
 
+    /**
+     * 获取显示模式
+     *
+     * @return
+     */
     public Mode getMode() {
         return mode;
     }
 
+    /**
+     * 设置显示模式
+     *
+     * @param mode
+     */
     public void setMode(Mode mode) {
         this.mode = mode;
         openPositions.clear();
@@ -229,20 +260,14 @@ public abstract class SwipeBaseAdapter<T, Holder> extends BaseListAdapter<T, Hol
 
         @Override
         public void onStartClose(SwipeItem layout) {
-            // TODO Auto-generated method stub
-
         }
 
         @Override
         public void onUpdate(SwipeItem layout, int leftOffset, int topOffset) {
-            // TODO Auto-generated method stub
-
         }
 
         @Override
         public void onHandRelease(SwipeItem layout, float xvel, float yvel) {
-            // TODO Auto-generated method stub
-
         }
     }
 
