@@ -38,7 +38,7 @@ public class DateUtil {
     /**
      * 获取现在时间
      *
-     * @return 返回<br>字符串格式</br> yyyy-MM-dd HH:mm:ss
+     * @return 返回字符串格式 yyyy-MM-dd HH:mm:ss
      */
     public static String getStringDateLong() {
         Date currentTime = new Date();
@@ -132,7 +132,7 @@ public class DateUtil {
     }
 
     /**
-     * 将长时间格式时间转换为字符串  <br>date转字符串</br>
+     * 将长时间格式时间转换为字符串 date转字符串
      *
      * @return yyyy-MM-dd HH:mm:ss
      */

@@ -8,7 +8,7 @@ import android.view.View;
 /**
  * 进行截屏工具类
  *
- * @time 2013/09/29
+ *  2013/09/29
  */
 public class ScreenShotUtils {
     /**

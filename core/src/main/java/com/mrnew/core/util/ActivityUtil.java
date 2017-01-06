@@ -1,6 +1,6 @@
 /**
  * Copyright(c)2012 Beijing PeaceMap Co. Ltd.
- * All right reserved. 
+ * All right reserved.
  */
 package com.mrnew.core.util;
 
@@ -11,10 +11,7 @@ import android.os.Bundle;
 import com.mrnew.R;
 
 /**
- * @author lim
- * @ClassName: ActivityManager
- * @Description: Activity管理器
- * @date 2013-7-30 上午06:53:04
+ *  Activity管理器
  */
 public class ActivityUtil {
 

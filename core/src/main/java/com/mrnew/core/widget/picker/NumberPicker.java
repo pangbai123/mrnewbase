@@ -137,7 +137,6 @@ public class NumberPicker extends LinearLayout {
 	 * way to do this; it avoids creating temporary objects on every call to
 	 * format().
 	 *
-	 * @hide
 	 */
 	public static final NumberPicker.Formatter TWO_DIGIT_FORMATTER = new NumberPicker.Formatter() {
 		final StringBuilder mBuilder = new StringBuilder();

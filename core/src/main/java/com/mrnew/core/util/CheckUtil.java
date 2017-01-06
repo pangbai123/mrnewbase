@@ -27,7 +27,6 @@ public class CheckUtil {
      * 判断是否是合法的身份证号
      *
      * @param string
-     * @return
      */
     public static boolean checkICCard(String string) {
         // 身份证号码为15位或者18位，15位时全为数字，18位前17位为数字，最后一位是校验位，可能为数字或字符X

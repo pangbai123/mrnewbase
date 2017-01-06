@@ -101,7 +101,7 @@ public class RoundedImageView extends ImageView {
     /**
      * Return the current scale type in use by this ImageView.
      *
-     * @attr ref android.R.styleable#ImageView_scaleType
+     *  ref android.R.styleable#ImageView_scaleType
      * @see ScaleType
      */
     @Override
@@ -114,7 +114,6 @@ public class RoundedImageView extends ImageView {
      * of this ImageView.
      *
      * @param scaleType The desired scaling mode.
-     * @attr ref android.R.styleable#ImageView_scaleType
      */
     @Override
     public void setScaleType(ScaleType scaleType) {
@@ -379,7 +378,6 @@ public class RoundedImageView extends ImageView {
     /**
      * 设置是否连背景一起裁剪
      *
-     * @return
      */
     public void setMutateBackground(boolean mutate) {
         if (mutateBackground == mutate) {
