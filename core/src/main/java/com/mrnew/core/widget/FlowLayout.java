@@ -10,13 +10,13 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
-import com.haoche.check.R;
+import com.mrnew.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 自动换行
+ * 自动换行容器
  */
 @SuppressWarnings("ALL")
 public class FlowLayout extends ViewGroup {

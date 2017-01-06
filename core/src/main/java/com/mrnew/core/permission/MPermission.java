@@ -2,9 +2,9 @@ package com.mrnew.core.permission;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.support.v4.app.Fragment;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -22,7 +22,6 @@ public class MPermission {
     /**
      * ********************* util *********************
      */
-
     public static List<String> getDeniedPermissions(Activity activity, String[] permissions) {
         return getDeniedPermissions((Object) activity, permissions);
     }

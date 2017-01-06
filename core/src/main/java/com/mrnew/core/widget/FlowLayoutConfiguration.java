@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.Gravity;
-import com.haoche.check.R;
+import com.mrnew.R;
 
 class FlowLayoutConfiguration {
     private int orientation = FlowLayout.HORIZONTAL;
