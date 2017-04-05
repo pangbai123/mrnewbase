@@ -21,8 +21,8 @@ public class Pointer extends LinearLayout {
 
     private int mNormalID = R.drawable.news_advert_dot_d;
     private int mCheckedID = R.drawable.news_advert_dot_p;
-    private int mLayoutRes = R.layout.advert_point;
-    private int mDrawableId = R.id.ad_item_v;
+    private int mLayoutRes = R.layout.ad_point;
+    private int mDrawableId = R.id.img;
 
     public Pointer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -61,6 +61,7 @@ public class Pointer extends LinearLayout {
         removeAllViews();
         for (int i = 0; i < POSINT_SIZE; i++) {
             View view = LayoutInflater.from(context).inflate(mLayoutRes, null);
+
             ImageView imageView = (ImageView) view.findViewById(mDrawableId);
             if (i == 0) {
                 imageView.setImageResource(mCheckedID);

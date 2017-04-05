@@ -1,47 +1,53 @@
 package com.mrnew.core.util;
 
+import android.content.ContentResolver;
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import java.io.*;
 
 /**
- * Created by pb on 2014/12/29.
+ * Created by pb on 2017/4/5.
  */
 public class FileUtils {
     /**
-     * 压缩图片
+     * 压缩图片,并返回临时文件地址
      *
      * @param uri       本地文件地址
      * @param maxWidth  压缩最大宽度
      * @param maxHeight 压缩最大宽度
      * @param maxSize   压缩最大内存,单位kb
-     * @return
+     * @return 临时文件地址
      */
-    public static String compressImage(Context context, String uri, int maxWidth, int maxHeight, int maxSize) {
+    public static String compressImage(Context context, String uri, int maxWidth, int maxHeight, int maxSize) throws OutOfMemoryError, IOException {
         Bitmap image = getBitmapFromFile(new File(uri), maxWidth, maxHeight);
-        if (image != null) {
-            try {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                image.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                int options = 100;
-                while (baos.toByteArray().length / 1024 > maxSize && options > 20) {
-                    baos.reset();
-                    image.compress(Bitmap.CompressFormat.JPEG, options, baos);
-                    options -= 10;
-                }
-                return saveBitmap(context, baos);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (OutOfMemoryError e) {
-                e.printStackTrace();
-            }
+        if (image == null) {
+            throw new IOException();
         }
-        return null;
+        Bitmap.CompressFormat format;
+        String suffix = getFileSuffix(uri);
+        if (suffix != null && suffix.equalsIgnoreCase("png")) {
+            format = Bitmap.CompressFormat.PNG;
+        } else {
+            format = Bitmap.CompressFormat.JPEG;
+        }
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        image.compress(format, 100, baos);
+        int options = 100;
+        while (baos.toByteArray().length / 1024 > maxSize && options > 20) {
+            baos.reset();
+            image.compress(format, options, baos);
+            options -= 10;
+        }
+        return saveTempBitmap(context, baos, format);
     }
 
     /**
@@ -52,30 +58,41 @@ public class FileUtils {
      * @param maxHeight
      * @return
      */
-    public static Bitmap getBitmapFromFile(File file, int maxWidth, int maxHeight) {
-        if (null != file && file.exists()) {
-            BitmapFactory.Options opts = null;
-            if (maxWidth > 0 && maxHeight > 0) {
-                opts = new BitmapFactory.Options();
-                opts.inJustDecodeBounds = true;//只读信息
-                BitmapFactory.decodeFile(file.getPath(), opts);
-                // 计算图片缩放比例
-                final int minSideLength = Math.min(maxWidth, maxHeight);
-                opts.inSampleSize = computeSampleSize(opts, minSideLength, maxWidth * maxHeight);
-                opts.inJustDecodeBounds = false;
-                opts.inInputShareable = true;
-                opts.inPurgeable = true;
-                opts.inPreferredConfig = Bitmap.Config.RGB_565;//使用16位图，不支持透明度
-            }
-            try {
-                return BitmapFactory.decodeFile(file.getPath(), opts);
-            } catch (OutOfMemoryError e) {
-                e.printStackTrace();
-            }
+    public static Bitmap getBitmapFromFile(File file, int maxWidth, int maxHeight) throws IOException, OutOfMemoryError {
+        if (file == null || !file.exists() || !file.isFile()) {
+            throw new IOException();
         }
-        return null;
+        String suffix = getFileSuffix(file.getAbsolutePath());
+        Bitmap.Config format;
+        if (suffix != null && suffix.equalsIgnoreCase("png")) {
+            format = Bitmap.Config.ARGB_4444;
+        } else {
+            format = Bitmap.Config.RGB_565;
+        }
+        BitmapFactory.Options opts = null;
+        if (maxWidth > 0 && maxHeight > 0) {
+            opts = new BitmapFactory.Options();
+            opts.inJustDecodeBounds = true;//只读信息
+            BitmapFactory.decodeFile(file.getPath(), opts);
+            // 计算图片缩放比例
+            final int minSideLength = Math.min(maxWidth, maxHeight);
+            opts.inSampleSize = computeSampleSize(opts, minSideLength, maxWidth * maxHeight);
+            opts.inJustDecodeBounds = false;
+            opts.inInputShareable = true;
+            opts.inPurgeable = true;
+            opts.inPreferredConfig = format;
+        }
+        return BitmapFactory.decodeFile(file.getPath(), opts);
     }
 
+    /**
+     * 计算缩放比例
+     *
+     * @param options
+     * @param minSideLength
+     * @param maxNumOfPixels
+     * @return
+     */
     private static int computeSampleSize(BitmapFactory.Options options,
                                          int minSideLength, int maxNumOfPixels) {
         int initialSize = computeInitialSampleSize(options, minSideLength,
@@ -94,6 +111,14 @@ public class FileUtils {
         return roundedSize;
     }
 
+    /**
+     * 计算缩放比例
+     *
+     * @param options
+     * @param minSideLength
+     * @param maxNumOfPixels
+     * @return
+     */
     private static int computeInitialSampleSize(BitmapFactory.Options options,
                                                 int minSideLength, int maxNumOfPixels) {
         double w = options.outWidth;
@@ -122,82 +147,101 @@ public class FileUtils {
      * 保存缓存图片，默认路径为getExternalCacheDir
      *
      * @param baos
+     * @param format
      * @return
      * @throws IOException
      */
-    public static String saveBitmap(Context context, ByteArrayOutputStream baos) throws IOException {
-        String fileName = "temp" + Utils.getUUID() + ".jpg";
-        String filePath = "";
-        if (baos == null) {
-            return filePath;
+    public static String saveTempBitmap(Context context, ByteArrayOutputStream baos, Bitmap.CompressFormat format) throws IOException {
+        String fileName;
+        if (format != null && format == Bitmap.CompressFormat.PNG) {
+            fileName = "temp" + Utils.getUUID() + ".png";
         } else {
-            String path = context.getExternalCacheDir().getAbsolutePath();
-            filePath = path + "/" + fileName;
-            File destFile = new File(filePath);
-            if (destFile.exists()) {
-                destFile.delete();
-            }
-            destFile.createNewFile();
-            OutputStream os = null;
-            try {
-                os = new FileOutputStream(destFile);
-                os.write(baos.toByteArray());
-                os.flush();
-                os.close();
-            } catch (IOException e) {
-                filePath = "";
-            }
-        }
-        return filePath;
-    }
+            fileName = "temp" + Utils.getUUID() + ".jpg";
 
-    /**
-     * 保存缓存图片，默认路径为getExternalCacheDir
-     *
-     * @param bitmap
-     * @return
-     * @throws IOException
-     */
-    public static String saveBitmap(Context context, Bitmap bitmap) throws IOException {
-        String fileName = "temp" + Utils.getUUID() + ".jpg";
+        }
         String path = context.getExternalCacheDir().getAbsolutePath();
         String filePath = path + "/" + fileName;
-        return saveBitmap(bitmap, filePath);
+        return saveBitmap(baos, filePath, true);
     }
 
     /**
      * 保存图片
      *
-     * @param bitmap
-     * @param filePath
+     * @param baos
+     * @param toPath
+     * @param isRewrite
      * @return
      * @throws IOException
      */
-    public static String saveBitmap(Bitmap bitmap, String filePath) throws IOException {
-        if (bitmap == null) {
-            return "";
-        }
-        File destFile = new File(filePath);
-        if (destFile.exists()) {
-            destFile.delete();
-        }
-        destFile.createNewFile();
-        OutputStream os = null;
-        try {
-            os = new FileOutputStream(destFile);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os);
+    public static String saveBitmap(ByteArrayOutputStream baos, String toPath, boolean isRewrite) throws IOException {
+        if (baos == null) {
+            throw new IOException();
+        } else {
+            File destFile = new File(toPath);
+            if (!destFile.isFile()) {
+                throw new IOException();
+            }
+            if (destFile.exists()) {
+                if (isRewrite) {
+                    destFile.delete();
+                } else {
+                    return toPath;
+                }
+            }
+            destFile.createNewFile();
+            OutputStream os = new FileOutputStream(destFile);
+            os.write(baos.toByteArray());
             os.flush();
             os.close();
-        } catch (IOException e) {
-            filePath = "";
         }
-        return filePath;
+        return toPath;
+    }
+
+
+    /**
+     * 保存图片
+     *
+     * @param bitmap
+     * @param toPath
+     * @return
+     * @throws IOException
+     */
+    public static String saveBitmap(Bitmap bitmap, String toPath, boolean isRewrite) throws IOException {
+        if (bitmap == null) {
+            throw new IOException();
+        }
+        File destFile = new File(toPath);
+        if (!destFile.isFile()) {
+            throw new IOException();
+        }
+        if (destFile.exists()) {
+            if (isRewrite) {
+                destFile.delete();
+            } else {
+                return toPath;
+            }
+        }
+        destFile.createNewFile();
+        OutputStream os = new FileOutputStream(destFile);
+        String suffix = getFileSuffix(toPath);
+        if (suffix != null && suffix.equalsIgnoreCase("png")) {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, os);
+        } else {
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os);
+        }
+
+        os.flush();
+        os.close();
+        return toPath;
     }
 
     /**
      * 删除缓存图片，默认路径为getExternalCacheDir
+     *
+     * @param context
+     * @param path    为null，为全部删除
      */
-    public static void deleteCacheFile(final Context context) {
+    public static void deleteTempFile(final Context context, final String path) {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -206,8 +250,17 @@ public class FileUtils {
                 for (File file : files) {
                     try {
                         File item = file;
-                        if (item.exists() && !item.isDirectory() && item.getName().startsWith("temp")) {
-                            item.delete();
+                        if (item.exists() && !item.isDirectory()) {
+                            if (path == null) {
+                                if (item.getName().startsWith("temp")) {
+                                    item.delete();
+                                }
+                            } else {
+                                if (path.equals(item.getAbsolutePath())) {
+                                    item.delete();
+                                    return;
+                                }
+                            }
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -224,39 +277,43 @@ public class FileUtils {
      * @param toFile
      * @param rewrite
      */
-    public static void copyfile(File fromFile, File toFile, Boolean rewrite) {
+    public static void copyfile(File fromFile, File toFile, Boolean rewrite) throws Exception {
         if (!fromFile.exists()) {
-            return;
+            throw new IOException();
         }
         if (!fromFile.isFile()) {
-            return;
+            throw new IOException();
         }
         if (!fromFile.canRead()) {
-            return;
+            throw new IOException();
         }
 
         if (!toFile.getParentFile().exists()) {
             toFile.getParentFile().mkdirs();
         }
 
-        if (toFile.exists() && rewrite) {
-            toFile.delete();
+        if (toFile.exists()) {
+            if (rewrite) {
+                toFile.delete();
+            } else {
+                return;
+            }
         }
+        toFile.createNewFile();
         FileInputStream fosfrom = null;
-
         FileOutputStream fosto = null;
-
+        Exception rete = null;
         try {
             fosfrom = new FileInputStream(fromFile);
             fosto = new FileOutputStream(toFile);
             byte bt[] = new byte[1024];
             int c;
             while ((c = fosfrom.read(bt)) > 0) {
-                fosto.write(bt, 0, c); //??????��???????????
+                fosto.write(bt, 0, c);
             }
 
         } catch (Exception ex) {
-
+            rete = ex;
             Log.e("readfile", ex.getMessage());
 
         } finally {
@@ -264,8 +321,11 @@ public class FileUtils {
                 fosfrom.close();
                 fosto.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                throw e;
             }
+        }
+        if (rete != null) {
+            throw rete;
         }
     }
 
@@ -294,6 +354,7 @@ public class FileUtils {
         }
         return size;
     }
+
     /**
      * 获取相册路径
      *
@@ -302,10 +363,84 @@ public class FileUtils {
     public static String getSystemImagePath() {
         if (Build.VERSION.SDK_INT > 7) {
             String picturePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath();
-            return picturePath + "/my/";
+            return picturePath + "/";
         } else {
             String picturePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath();
-            return picturePath + "/my/";
+            return picturePath + "/";
         }
+    }
+
+    /**
+     * 获取文件后缀
+     *
+     * @param path
+     * @return
+     */
+    public static String getFileSuffix(String path) {
+        String suffix = null;
+        if (path != null) {
+            int index = path.lastIndexOf("/");
+            if (index != -1) {
+                String name = path.substring(index + 1);
+                int suffixindex = path.lastIndexOf(".");
+                if (suffixindex != -1) {
+                    suffix = name.substring(suffixindex + 1);
+                }
+            }
+
+        }
+        return suffix;
+    }
+
+    /**
+     * 从相册获取文件
+     *
+     * @param context
+     * @param uri
+     * @return null，为获取失败
+     */
+    public static File getFileByUri(Context context, Uri uri) {
+        String path = null;
+        if ("file".equals(uri.getScheme())) {
+            path = uri.getEncodedPath();
+            if (path != null) {
+                path = Uri.decode(path);
+                ContentResolver cr = context.getContentResolver();
+                StringBuffer buff = new StringBuffer();
+                buff.append("(").append(MediaStore.Images.ImageColumns.DATA).append("=").append("'" + path + "'").append(")");
+                Cursor cur = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        new String[]{MediaStore.Images.ImageColumns._ID, MediaStore.Images.ImageColumns.DATA}, buff.toString(), null, null);
+                int index = 0;
+                int dataIdx = 0;
+                for (cur.moveToFirst(); !cur.isAfterLast(); cur.moveToNext()) {
+                    index = cur.getColumnIndex(MediaStore.Images.ImageColumns._ID);
+                    index = cur.getInt(index);
+                    dataIdx = cur.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+                    path = cur.getString(dataIdx);
+                }
+                cur.close();
+                if (index == 0) {
+                } else {
+                    Uri u = Uri.parse("content://media/external/images/media/" + index);
+                    System.out.println("temp uri is :" + u);
+                }
+            }
+            if (path != null) {
+                return new File(path);
+            }
+        } else if ("content".equals(uri.getScheme())) {
+            // 4.2.2以后
+            String[] proj = {MediaStore.Images.Media.DATA};
+            Cursor cursor = context.getContentResolver().query(uri, proj, null, null, null);
+            if (cursor.moveToFirst()) {
+                int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                path = cursor.getString(columnIndex);
+            }
+            cursor.close();
+            return new File(path);
+        } else {
+            Log.i("videouri", "Uri Scheme:" + uri.getScheme());
+        }
+        return null;
     }
 }

@@ -210,7 +210,7 @@ public class XListView extends ListView implements OnScrollListener {
             l.onXScrolling(this);
         }
         if (mScrollListener1 instanceof OnXScrollListener) {
-            OnXScrollListener l = (OnXScrollListener) mScrollListener;
+            OnXScrollListener l = (OnXScrollListener) mScrollListener1;
             l.onXScrolling(this);
         }
     }
