@@ -1,7 +1,6 @@
 package com.mrnew.core.util;
 
-import android.content.Context;
-import android.widget.Toast;
+import android.util.Log;
 
 /**
  * 日志二次封装
@@ -14,20 +13,29 @@ public class LogTool {
      */
     public static boolean DEBUG = true;
 
-    public static void show(Context context, String str) {
-        if (DEBUG) {
-            Toast.makeText(context, str, Toast.LENGTH_SHORT).show();
-        }
-    }
-
     /**
      * Send a VERBOSE log message.
      *
      * @param msg The message you would like logged.
      */
     public static void v(String msg) {
-        if (DEBUG)
-            android.util.Log.v(TAG, buildMessage(msg));
+        if (DEBUG) {
+            String sb = buildMessage(msg);
+            if (sb.length() > 3000) {
+                Log.v(TAG, "sb.length = " + sb.length());
+                int chunkCount = sb.length() / 3000;     // integer division
+                for (int i = 0; i <= chunkCount; i++) {
+                    int max = 3000 * (i + 1);
+                    if (max >= sb.length()) {
+                        Log.v(TAG, sb.substring(3000 * i));
+                    } else {
+                        Log.v(TAG, sb.substring(3000 * i, max));
+                    }
+                }
+            } else {
+                Log.v(TAG, sb.toString());
+            }
+        }
     }
 
     /**
@@ -37,8 +45,23 @@ public class LogTool {
      * @param thr An exception to log
      */
     public static void v(String msg, Throwable thr) {
-        if (DEBUG)
-            android.util.Log.v(TAG, buildMessage(msg), thr);
+        if (DEBUG) {
+            String sb = buildMessage(msg);
+            if (sb.length() > 3000) {
+                Log.v(TAG, "sb.length = " + sb.length());
+                int chunkCount = sb.length() / 3000;     // integer division
+                for (int i = 0; i <= chunkCount; i++) {
+                    int max = 3000 * (i + 1);
+                    if (max >= sb.length()) {
+                        Log.v(TAG, sb.substring(3000 * i), thr);
+                    } else {
+                        Log.v(TAG, sb.substring(3000 * i, max));
+                    }
+                }
+            } else {
+                Log.v(TAG, sb.toString(), thr);
+            }
+        }
     }
 
     /**
@@ -47,8 +70,23 @@ public class LogTool {
      * @param msg
      */
     public static void d(String msg) {
-        if (DEBUG)
-            android.util.Log.d(TAG, buildMessage(msg));
+        if (DEBUG) {
+            String sb = buildMessage(msg);
+            if (sb.length() > 3000) {
+                Log.v(TAG, "sb.length = " + sb.length());
+                int chunkCount = sb.length() / 3000;     // integer division
+                for (int i = 0; i <= chunkCount; i++) {
+                    int max = 3000 * (i + 1);
+                    if (max >= sb.length()) {
+                        Log.d(TAG, sb.substring(3000 * i));
+                    } else {
+                        Log.d(TAG, sb.substring(3000 * i, max));
+                    }
+                }
+            } else {
+                Log.d(TAG, sb.toString());
+            }
+        }
     }
 
     /**
@@ -58,8 +96,23 @@ public class LogTool {
      * @param thr An exception to log
      */
     public static void d(String msg, Throwable thr) {
-        if (DEBUG)
-            android.util.Log.d(TAG, buildMessage(msg), thr);
+        if (DEBUG) {
+            String sb = buildMessage(msg);
+            if (sb.length() > 3000) {
+                Log.v(TAG, "sb.length = " + sb.length());
+                int chunkCount = sb.length() / 3000;     // integer division
+                for (int i = 0; i <= chunkCount; i++) {
+                    int max = 3000 * (i + 1);
+                    if (max >= sb.length()) {
+                        Log.d(TAG, sb.substring(3000 * i), thr);
+                    } else {
+                        Log.d(TAG, sb.substring(3000 * i, max));
+                    }
+                }
+            } else {
+                Log.d(TAG, sb.toString(), thr);
+            }
+        }
     }
 
     /**
@@ -68,8 +121,23 @@ public class LogTool {
      * @param msg The message you would like logged.
      */
     public static void i(String msg) {
-        if (DEBUG)
-            android.util.Log.i(TAG, buildMessage(msg));
+        if (DEBUG) {
+            String sb = buildMessage(msg);
+            if (sb.length() > 3000) {
+                Log.v(TAG, "sb.length = " + sb.length());
+                int chunkCount = sb.length() / 3000;     // integer division
+                for (int i = 0; i <= chunkCount; i++) {
+                    int max = 3000 * (i + 1);
+                    if (max >= sb.length()) {
+                        Log.i(TAG, sb.substring(3000 * i));
+                    } else {
+                        Log.i(TAG, sb.substring(3000 * i, max));
+                    }
+                }
+            } else {
+                Log.i(TAG, sb.toString());
+            }
+        }
     }
 
     /**
@@ -79,8 +147,23 @@ public class LogTool {
      * @param thr An exception to log
      */
     public static void i(String msg, Throwable thr) {
-        if (DEBUG)
-            android.util.Log.i(TAG, buildMessage(msg), thr);
+        if (DEBUG) {
+            String sb = buildMessage(msg);
+            if (sb.length() > 3000) {
+                Log.v(TAG, "sb.length = " + sb.length());
+                int chunkCount = sb.length() / 3000;     // integer division
+                for (int i = 0; i <= chunkCount; i++) {
+                    int max = 3000 * (i + 1);
+                    if (max >= sb.length()) {
+                        Log.i(TAG, sb.substring(3000 * i), thr);
+                    } else {
+                        Log.i(TAG, sb.substring(3000 * i, max));
+                    }
+                }
+            } else {
+                Log.i(TAG, sb.toString(), thr);
+            }
+        }
     }
 
     /**
@@ -89,8 +172,23 @@ public class LogTool {
      * @param msg The message you would like logged.
      */
     public static void e(String msg) {
-        if (DEBUG)
-            android.util.Log.e(TAG, buildMessage(msg));
+        if (DEBUG) {
+            String sb = buildMessage(msg);
+            if (sb.length() > 3000) {
+                Log.v(TAG, "sb.length = " + sb.length());
+                int chunkCount = sb.length() / 3000;     // integer division
+                for (int i = 0; i <= chunkCount; i++) {
+                    int max = 3000 * (i + 1);
+                    if (max >= sb.length()) {
+                        Log.e(TAG, sb.substring(3000 * i));
+                    } else {
+                        Log.e(TAG, sb.substring(3000 * i, max));
+                    }
+                }
+            } else {
+                Log.e(TAG, sb.toString());
+            }
+        }
     }
 
     /**
@@ -99,8 +197,23 @@ public class LogTool {
      * @param msg The message you would like logged.
      */
     public static void w(String msg) {
-        if (DEBUG)
-            android.util.Log.w(TAG, buildMessage(msg));
+        if (DEBUG) {
+            String sb = buildMessage(msg);
+            if (sb.length() > 3000) {
+                Log.v(TAG, "sb.length = " + sb.length());
+                int chunkCount = sb.length() / 3000;     // integer division
+                for (int i = 0; i <= chunkCount; i++) {
+                    int max = 3000 * (i + 1);
+                    if (max >= sb.length()) {
+                        Log.w(TAG, sb.substring(3000 * i));
+                    } else {
+                        Log.w(TAG, sb.substring(3000 * i, max));
+                    }
+                }
+            } else {
+                Log.w(TAG, sb.toString());
+            }
+        }
     }
 
     /**
@@ -110,8 +223,23 @@ public class LogTool {
      * @param thr An exception to log
      */
     public static void w(String msg, Throwable thr) {
-        if (DEBUG)
-            android.util.Log.w(TAG, buildMessage(msg), thr);
+        if (DEBUG) {
+            String sb = buildMessage(msg);
+            if (sb.length() > 3000) {
+                Log.v(TAG, "sb.length = " + sb.length());
+                int chunkCount = sb.length() / 3000;     // integer division
+                for (int i = 0; i <= chunkCount; i++) {
+                    int max = 3000 * (i + 1);
+                    if (max >= sb.length()) {
+                        Log.w(TAG, sb.substring(3000 * i), thr);
+                    } else {
+                        Log.w(TAG, sb.substring(3000 * i, max));
+                    }
+                }
+            } else {
+                Log.w(TAG, sb.toString(), thr);
+            }
+        }
     }
 
     /**
@@ -121,7 +249,7 @@ public class LogTool {
      */
     public static void w(Throwable thr) {
         if (DEBUG)
-            android.util.Log.w(TAG, buildMessage(""), thr);
+            Log.w(TAG, buildMessage(""), thr);
     }
 
     /**
@@ -131,8 +259,23 @@ public class LogTool {
      * @param thr An exception to log
      */
     public static void e(String msg, Throwable thr) {
-        if (DEBUG)
-            android.util.Log.e(TAG, buildMessage(msg), thr);
+        if (DEBUG) {
+            String sb = buildMessage(msg);
+            if (sb.length() > 3000) {
+                Log.v(TAG, "sb.length = " + sb.length());
+                int chunkCount = sb.length() / 3000;     // integer division
+                for (int i = 0; i <= chunkCount; i++) {
+                    int max = 3000 * (i + 1);
+                    if (max >= sb.length()) {
+                        Log.e(TAG, sb.substring(3000 * i), thr);
+                    } else {
+                        Log.e(TAG, sb.substring(3000 * i, max));
+                    }
+                }
+            } else {
+                Log.e(TAG, sb.toString(), thr);
+            }
+        }
     }
 
     /**

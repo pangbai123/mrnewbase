@@ -9,12 +9,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.telephony.TelephonyManager;
 import android.text.ClipboardManager;
-import android.text.Selection;
-import android.text.Spannable;
 import android.text.TextUtils;
-import android.widget.EditText;
 
-import java.text.DecimalFormat;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -194,6 +191,25 @@ public class Utils {
         return false;
     }
 
-
+    /**
+     * 获取进程名
+     *
+     * @param cxt
+     * @param pid
+     * @return
+     */
+    public static String getProcessName(Context cxt, int pid) {
+        android.app.ActivityManager am = (android.app.ActivityManager) cxt.getSystemService(Context.ACTIVITY_SERVICE);
+        List<android.app.ActivityManager.RunningAppProcessInfo> runningApps = am.getRunningAppProcesses();
+        if (runningApps == null) {
+            return null;
+        }
+        for (android.app.ActivityManager.RunningAppProcessInfo procInfo : runningApps) {
+            if (procInfo.pid == pid) {
+                return procInfo.processName;
+            }
+        }
+        return null;
+    }
 
 }

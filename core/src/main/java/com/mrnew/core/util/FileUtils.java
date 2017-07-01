@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.*;
@@ -177,10 +178,10 @@ public class FileUtils {
         if (baos == null) {
             throw new IOException();
         } else {
-            File destFile = new File(toPath);
-            if (!destFile.isFile()) {
+            if (TextUtils.isEmpty(toPath) || toPath.endsWith("/")) {
                 throw new IOException();
             }
+            File destFile = new File(toPath);
             if (destFile.exists()) {
                 if (isRewrite) {
                     destFile.delete();
@@ -210,10 +211,10 @@ public class FileUtils {
         if (bitmap == null) {
             throw new IOException();
         }
-        File destFile = new File(toPath);
-        if (!destFile.isFile()) {
+        if (TextUtils.isEmpty(toPath) || toPath.endsWith("/")) {
             throw new IOException();
         }
+        File destFile = new File(toPath);
         if (destFile.exists()) {
             if (isRewrite) {
                 destFile.delete();
@@ -382,7 +383,7 @@ public class FileUtils {
             int index = path.lastIndexOf("/");
             if (index != -1) {
                 String name = path.substring(index + 1);
-                int suffixindex = path.lastIndexOf(".");
+                int suffixindex = name.lastIndexOf(".");
                 if (suffixindex != -1) {
                     suffix = name.substring(suffixindex + 1);
                 }

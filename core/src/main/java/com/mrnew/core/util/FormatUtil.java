@@ -86,4 +86,43 @@ public class FormatUtil {
         }
     }
 
+    /**
+     * 格式化金额
+     *
+     * @param number
+     * @param mastDigit 最多小数位数
+     * @return
+     */
+    public static String formatMoney(double number, int mastDigit) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("###,##0");
+        for (int i = 0; i < mastDigit; i++) {
+            if (i == 0) {
+                sb.append(".");
+            }
+            sb.append("#");
+        }
+        DecimalFormat formater = new DecimalFormat(sb.toString());
+        return formater.format(number);
+    }
+
+    /**
+     * 格式化金额
+     *
+     * @param number
+     * @param mastDigit 最多小数位数
+     * @return
+     */
+    public static String formatNumber(double number, int mastDigit) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("#0");
+        for (int i = 0; i < mastDigit; i++) {
+            if (i == 0) {
+                sb.append(".");
+            }
+            sb.append("#");
+        }
+        DecimalFormat formater = new DecimalFormat(sb.toString());
+        return formater.format(number);
+    }
 }
