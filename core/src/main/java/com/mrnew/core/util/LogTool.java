@@ -7,10 +7,8 @@ import android.util.Log;
  */
 public class LogTool {
 
-    public static final String TAG = "base";
-    /**
-     * 在mmconfig中进行配置
-     */
+    public static final String TAG = "mrnew";
+
     public static boolean DEBUG = true;
 
     /**

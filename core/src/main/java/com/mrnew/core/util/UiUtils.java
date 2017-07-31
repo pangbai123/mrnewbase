@@ -8,6 +8,7 @@ import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.TextView;
 
 /**
@@ -154,5 +155,25 @@ public class UiUtils {
         para.width = toWidth;
         para.height = picHeight * toWidth / picWidth;
         view.setLayoutParams(para);
+    }
+
+    /**
+     * 本地加载富文本
+     *
+     * @param webView
+     * @param bodyHTML
+     */
+    public static void loadLocalHtml(WebView webView, String bodyHTML) {
+        String ret = "";
+        if (bodyHTML != null && bodyHTML.startsWith("<html")) {
+            ret = bodyHTML;
+        } else {
+            String head = "<head>" +
+                    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\"> " +
+                    "<style>img{max-width: 100%; width:auto; height:auto;}</style>" +
+                    "</head>";
+            ret = "<html>" + head + "<body>" + bodyHTML + "</body></html>";
+        }
+        webView.loadData(ret, "text/html; charset=utf-8", "utf-8");
     }
 }

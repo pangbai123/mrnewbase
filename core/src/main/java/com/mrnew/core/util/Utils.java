@@ -8,7 +8,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Build;
 import android.telephony.TelephonyManager;
-import android.text.ClipboardManager;
 import android.text.TextUtils;
 
 import java.util.List;
@@ -175,15 +174,9 @@ public class Utils {
             if (content == null) {
                 content = "";
             }
-            //android 3.0以上支持图文复制,目前只做文字复制
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                android.content.ClipboardManager cmb = (android.content.ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("lable", content);
-                cmb.setPrimaryClip(clip);
-            } else {
-                ClipboardManager cmb = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-                cmb.setText(content);
-            }
+            android.content.ClipboardManager cmb = (android.content.ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("lable", content);
+            cmb.setPrimaryClip(clip);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
