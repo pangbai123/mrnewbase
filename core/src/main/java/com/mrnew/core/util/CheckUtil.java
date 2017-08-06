@@ -59,4 +59,19 @@ public class CheckUtil {
         return p.matcher(string).matches();
     }
 
+    /**
+     * 检查数字
+     *
+     * @param value
+     * @return
+     */
+    public static boolean checkNumber(String value) {
+        try {
+            Integer.parseInt(value);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

@@ -84,7 +84,7 @@ public class RoundedImageView extends ImageView {
             borderColor = ColorStateList.valueOf(RoundedDrawable.DEFAULT_BORDER_COLOR);
         }
 
-        mutateBackground = a.getBoolean(R.styleable.RoundedImageView_mutate_background, false);
+        mutateBackground = a.getBoolean(R.styleable.RoundedImageView_mutate_background, true);
         isOval = a.getBoolean(R.styleable.RoundedImageView_oval, false);
 
         updateDrawableAttrs();

@@ -1,6 +1,7 @@
 package com.mrnew.core.util;
 
 import android.app.Activity;
+import android.os.Build;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -8,6 +9,7 @@ import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.TextView;
 
@@ -164,6 +166,12 @@ public class UiUtils {
      * @param bodyHTML
      */
     public static void loadLocalHtml(WebView webView, String bodyHTML) {
+        webView.getSettings().setDefaultTextEncodingName("utf-8");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            webView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING);
+        } else {
+            webView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
+        }
         String ret = "";
         if (bodyHTML != null && bodyHTML.startsWith("<html")) {
             ret = bodyHTML;
