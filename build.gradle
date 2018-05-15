@@ -4,9 +4,13 @@ buildscript {
     repositories {
         maven { url "http://maven.aliyun.com/nexus/content/groups/public" }
         jcenter()
+        maven {
+            url 'https://maven.google.com/'
+            name 'Google'
+        }
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:2.3.0"
+        classpath "com.android.tools.build:gradle:3.1.2"
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.5'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
         // NOTE: Do not place your application dependencies here; they belong
@@ -24,15 +28,19 @@ allprojects {
         }
         maven { url "http://maven.aliyun.com/nexus/content/groups/public" }
         jcenter()
+        maven {
+            url 'https://maven.google.com/'
+            name 'Google'
+        }
     }
 }
 
 ext {
-    compileSdk = 25
-    minSdk = 17
+    compileSdk = 27
+    minSdk = 19
     targetSdk = compileSdk
-    support = "25.3.0"
-    buildTools = "25.0.2"
+    support = "27.0.0"
+    buildTools = "27.0.1"
 }
 task clean(type: Delete) {
     delete rootProject.buildDir

@@ -3,15 +3,18 @@ package com.mrnew.core.widget;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.PointF;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.Gallery;
 import com.mrnew.core.util.UiUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -20,7 +23,7 @@ import java.util.TimerTask;
  *
  * @author Administrator
  */
-public class MyImgScrollViewPager extends ViewPager {
+public class MyImgGallery extends Gallery {
     Activity mActivity; // 上下文
     ArrayList<View> mViews = new ArrayList<>(); // 图片组
     int mScrollTime = 0;
@@ -34,17 +37,47 @@ public class MyImgScrollViewPager extends ViewPager {
      * 触摸时当前的点 *
      */
     PointF curP = new PointF();
-    private MyPagerAdapter myPagerAdapter;
+    private MyAdapter myPagerAdapter;
     private OnImageCallBack mOnImageCallBack;
-    private ArrayList mBanners;
-    private Pointer mPointer;
+    private List mBanners;
+    private boolean isAutoResume = false;
+    private boolean isTimerStart = false;
     private boolean isCirculate;
+    private Pointer mPointer;
 
-    public MyImgScrollViewPager(Context context, AttributeSet attrs) {
+    public MyImgGallery(Context context, AttributeSet attrs) {
         super(context, attrs);
-        // 设置滑动动画时间  ,如果用默认动画时间可不用 ,反射技术实现
-        new MyImgScrollViewScroller(context).setDuration(this, 700);
+    }
 
+    @Override
+    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        if (e1.getX() - e2.getX() < 0.0F) {
+            onKeyDown(KeyEvent.KEYCODE_DPAD_LEFT, null);
+        } else {
+            onKeyDown(KeyEvent.KEYCODE_DPAD_RIGHT, null);
+        }
+        return true;
+    }
+
+    @Override
+    public void playSoundEffect(int soundConstant) {
+        //去除切换音效
+    }
+
+    public void onPause() {
+        if (isTimerStart) {
+            stopTimer();
+            isAutoResume = true;
+        }
+    }
+
+    public void onResume() {
+        if (!isTimerStart) {
+            if (isAutoResume) {
+                isAutoResume = false;
+                startTimer();
+            }
+        }
     }
 
     /**
@@ -56,7 +89,7 @@ public class MyImgScrollViewPager extends ViewPager {
      * @param ovalLayout   圆点容器,可为空,LinearLayout类型
      * @param isCirculate  是否无限循环
      */
-    public void start(Activity mainActivity, ArrayList banners, int scrollTime, Pointer ovalLayout, boolean isCirculate) {
+    public void start(Activity mainActivity, List banners, int scrollTime, Pointer ovalLayout, boolean isCirculate) {
         if (mOnImageCallBack == null) {
             throw new RuntimeException("must be call setOnImageCallBack before start");
         }
@@ -75,10 +108,9 @@ public class MyImgScrollViewPager extends ViewPager {
         mPointer = ovalLayout;
         initPointer();
         curIndex = 0;
-        removeAllViews();
-        myPagerAdapter = new MyPagerAdapter(mViews);
+        myPagerAdapter = new MyAdapter(mViews);
         setAdapter(myPagerAdapter);
-        if (scrollTime != 0 && mBanners.size() > 1) {
+        if (scrollTime > 0 && mBanners.size() > 1) {
             startTimer();
             // 触摸时停止滚动
             setOnTouchListener(mOnTouchListener);
@@ -86,10 +118,12 @@ public class MyImgScrollViewPager extends ViewPager {
             stopTimer();
             setOnTouchListener(null);
         }
-        if (mBanners.size() > 1) {
-            setCurrentItem(100 - 100 % mBanners.size(), false);
+        if (scrollTime > 0 && mBanners.size() > 1) {
+            setSelection(200 - 200 % mBanners.size(), false);
         } else {
-            setCurrentItem(0, false);
+            if (!mBanners.isEmpty()) {
+                setSelection(0, false);
+            }
         }
         myPagerAdapter.notifyDataSetChanged();
     }
@@ -110,7 +144,7 @@ public class MyImgScrollViewPager extends ViewPager {
      *
      * @param banners
      */
-    private void initListViews(ArrayList banners) {
+    private void initListViews(List banners) {
         mViews.clear();
         int realSize = banners.size();
         int size = realSize;
@@ -132,10 +166,11 @@ public class MyImgScrollViewPager extends ViewPager {
                 mPointer.setCurrentIndex(0);
             }
         }
-        setOnPageChangeListener(new OnPageChangeListener() {
-            public void onPageSelected(int i) {
+        setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (mBanners.size() != 0) {
-                    curIndex = i % mBanners.size();
+                    curIndex = position % mBanners.size();
                 } else {
                     curIndex = 0;
                 }
@@ -144,13 +179,11 @@ public class MyImgScrollViewPager extends ViewPager {
                 }
             }
 
-            public void onPageScrolled(int arg0, float arg1, int arg2) {
-            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
 
-            public void onPageScrollStateChanged(int arg0) {
             }
         });
-
     }
 
     /**
@@ -167,6 +200,7 @@ public class MyImgScrollViewPager extends ViewPager {
         }
     }
 
+
     /**
      * 取得当明选中下标
      *
@@ -180,6 +214,7 @@ public class MyImgScrollViewPager extends ViewPager {
      * 停止滚动
      */
     public void stopTimer() {
+        isTimerStart = false;
         if (timer != null) {
             timer.cancel();
             timer = null;
@@ -191,12 +226,13 @@ public class MyImgScrollViewPager extends ViewPager {
      */
     public void startTimer() {
         stopTimer();
+        isTimerStart = true;
         timer = new Timer();
         timer.schedule(new TimerTask() {
             public void run() {
                 mActivity.runOnUiThread(new Runnable() {
                     public void run() {
-                        setCurrentItem(getCurrentItem() + 1);
+                        onKeyDown(KeyEvent.KEYCODE_DPAD_RIGHT, null);
                     }
                 });
             }
@@ -212,17 +248,17 @@ public class MyImgScrollViewPager extends ViewPager {
         this.mOnImageCallBack = mOnImageCallBack;
     }
 
-    // 适配器 //循环设置
-    private class MyPagerAdapter extends PagerAdapter {
+    private class MyAdapter extends BaseAdapter {
         private ArrayList<View> views;
 
-        public MyPagerAdapter(ArrayList<View> views) {
+        public MyAdapter(ArrayList<View> views) {
             this.views = views;
         }
 
+        @Override
         public int getCount() {
             if (views.size() == 1) {// 一张图片时不用流动
-                return views.size();
+                return 1;
             }
             if (!isCirculate) {
                 return views.size();
@@ -230,32 +266,22 @@ public class MyImgScrollViewPager extends ViewPager {
             return Integer.MAX_VALUE;
         }
 
-        public Object instantiateItem(ViewGroup v, int i) {
+        @Override
+        public Object getItem(int position) {
+            return views.get(position % views.size());
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int i, View convertView, ViewGroup parent) {
             if (views.size() == 0) {
                 return null;
             }
-            View view = views.get(i % views.size());
-            int index = v.indexOfChild(view);
-            if (index != -1 && index != 0) {
-                v.removeView(view);
-            }
-            if (index != 0) {
-                v.addView(view, 0);
-            }
-            return view;
-        }
-
-        public boolean isViewFromObject(View arg0, Object arg1) {
-            return arg0 == arg1;
-        }
-
-
-        public void destroyItem(ViewGroup v, int i, Object arg2) {
-
-        }
-
-        public int getItemPosition(Object object) {
-            return POSITION_NONE;
+            return (View) getItem(i);
         }
     }
 

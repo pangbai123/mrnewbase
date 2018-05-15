@@ -11,7 +11,7 @@ import android.os.Bundle;
 import com.mrnew.R;
 
 /**
- *  Activity管理器
+ * Activity管理器
  */
 public class ActivityUtil {
 
@@ -51,6 +51,10 @@ public class ActivityUtil {
 
     public static void nextFromFragment(Fragment fragment, Class<?> nextActivity, Bundle extras, int reqCode) {
         nextFromFragment(fragment, nextActivity, extras, reqCode, -1, R.anim.in_from_right, R.anim.out_to_left, false);
+    }
+
+    public static void nextFromSupportFragment(android.support.v4.app.Fragment fragment, Class<?> nextActivity, Bundle extras, int reqCode) {
+        nextFromSupportFragment(fragment, nextActivity, extras, reqCode, -1, R.anim.in_from_right, R.anim.out_to_left, false);
     }
 
 
@@ -195,6 +199,27 @@ public class ActivityUtil {
     }
 
     public static void nextFromFragment(Fragment fragment, Class<?> nextActivity, Bundle extras, int reqCode, int flag, int inAnimId, int outAnimId, boolean isFinish) {
+        Intent intent = new Intent(fragment.getActivity(), nextActivity);
+        if (null != extras) {
+            intent.putExtras(extras);
+        }
+        if (flag != -1) {
+            intent.setFlags(flag);
+        }
+        if (reqCode < 0) {
+            fragment.startActivity(intent);
+        } else {
+            fragment.startActivityForResult(intent, reqCode);
+        }
+        if (inAnimId != -1 && outAnimId != -1) {
+            fragment.getActivity().overridePendingTransition(inAnimId, outAnimId);
+        }
+        if (isFinish) {
+            fragment.getActivity().finish();
+        }
+    }
+
+    public static void nextFromSupportFragment(android.support.v4.app.Fragment fragment, Class<?> nextActivity, Bundle extras, int reqCode, int flag, int inAnimId, int outAnimId, boolean isFinish) {
         Intent intent = new Intent(fragment.getActivity(), nextActivity);
         if (null != extras) {
             intent.putExtras(extras);
